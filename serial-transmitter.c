@@ -1,7 +1,3 @@
-// Version 13.0 but wont be used
-// with system cls 
-
-
 #include <Windows.h>
 #include <stdio.h>
 #include <string.h>
@@ -37,7 +33,7 @@ void print_intro(){
 	colorprint(" / __  / /_/ / /_/ /  __/ /     / ___ |/ /  / /_/ / /_/ / / / / / /_/ /  / /_/ / /  / /| |/ /  __/ /    \n", 10);
 	colorprint("/_/ /_/\\__, / .___/\\___/_/     /_/  |_/_/   \\__,_/\\__,_/_/_/ /_/\\____/  /_____/_/  /_/ |___/\\___/_/     \n", 10);
 	colorprint("      /____/_/                                                                                          \n", 10);
-	colorprint("                                                                                        Author: hybrayhem\n\n\n\n", 10);
+	colorprint("                                                                                          by hybrayhem\n\n\n\n", 10);
 
 	colorprint("Please select from the following Menu:\n\n", 14);
 	colorprint("(1)  ", 14); colorprint("Turn ON Led on The Arduino\n", 11);
@@ -52,7 +48,7 @@ void print_intro(){
 	colorprint("(10) ", 14); colorprint("Distance Hue\n", 11);
 	colorprint("(0)  ", 12); colorprint("Exit\n", 12);
 	
-//	printf("\nConnecting to Arduino...");
+	printf("\nConnecting to Arduino...");
 }
 
 void print_outro(){
@@ -151,11 +147,10 @@ read:
 int main(void) {
 	
 	//--------------------------Please enter port number before start--------------------------//
-	char port[] = "COM4";
+	char port[] = "COM3";
 	//-----------------------------------------------------------------------------------------//
 	
 	print_intro();
-	printf("\nConnecting to Arduino...");
 	int number;
 	int counter = 0;
 	char temp[64];
@@ -309,7 +304,7 @@ int main(void) {
 			}
 		}
 		else if(strcmp(SerialBuffer, "7") == 0){
-			printf("#PRESS 0 TO RETURN MENU#\n");
+			printf("# PRESS 0 TO RETURN MENU #\n");
 			serial_write(hComm, "5");  // command 5 activates joystick in arduino
 			char ch;
 			int is_painting = 0;
@@ -397,7 +392,7 @@ int main(void) {
 		            // Terminates the loop when escape is pressed 
 		            if (ch == '0'){
 		            	serial_write(hComm, "9");
-		            	serial_read(hComm, 1, SerialBuffer); //for waiting end message from joystick data stream of arduino
+		            	serial_read(hComm, 1, SerialBuffer); //for waiting end message of data stream from arduino
 					    break;
 					}	    
 				}
@@ -415,7 +410,7 @@ int main(void) {
 		}
 		else if(strcmp(SerialBuffer, "10") == 0){
 			printf("# PRESS 0 TO RETURN MENU #\n\n");
-			serial_write(hComm, "8");	// 7 starts rgb in arduino
+			serial_write(hComm, "8");	// 8 starts rgb with distance sensor in arduino
 			char ch;
 			counter = 0;
 			
@@ -433,7 +428,7 @@ int main(void) {
 		            // Terminates the loop when escape is pressed 
 		            if (ch == '0'){
 		            	serial_write(hComm, "9");
-		            	serial_read(hComm, 1, SerialBuffer); //for waiting end message from joystick data stream of arduino
+		            	serial_read(hComm, 1, SerialBuffer); //for waiting end message of data stream from arduino
 					    break;
 					}	    
 				}
@@ -453,8 +448,6 @@ int main(void) {
 		else{
 			printf("Invalid command: '%s'\n",SerialBuffer);
 		}
-		system("cls");
-		print_intro();
 	}
     
     
