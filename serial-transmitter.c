@@ -1,8 +1,6 @@
-// Version 12.0 
-// terminal renkleri yesil yapildi
-// hex ozelligi silindi
+// Version 13.0 but wont be used
+// with system cls 
 
-// clear eklenecek
 
 #include <Windows.h>
 #include <stdio.h>
@@ -54,12 +52,12 @@ void print_intro(){
 	colorprint("(10) ", 14); colorprint("Distance Hue\n", 11);
 	colorprint("(0)  ", 12); colorprint("Exit\n", 12);
 	
-	printf("\nConnecting to Arduino...");
+//	printf("\nConnecting to Arduino...");
 }
 
 void print_outro(){
 	printf("\n\n");
-	cPrint("Game over. \n", 12); 	       
+	colorprint("Game over. \n", 12);       
 }
 
 print_ruler(int distance){ // 20mm to 1200mm, displays 1 to 98
@@ -74,7 +72,6 @@ print_ruler(int distance){ // 20mm to 1200mm, displays 1 to 98
 	for(i=0; i<space; i++){
 		printf(" ");
 	}
-	//printf("*",distance);
 }
 
 int map(int x, int in_min, int in_max, int out_min, int out_max){
@@ -154,10 +151,11 @@ read:
 int main(void) {
 	
 	//--------------------------Please enter port number before start--------------------------//
-	char port[] = "COM3";
+	char port[] = "COM4";
 	//-----------------------------------------------------------------------------------------//
 	
 	print_intro();
+	printf("\nConnecting to Arduino...");
 	int number;
 	int counter = 0;
 	char temp[64];
@@ -455,6 +453,8 @@ int main(void) {
 		else{
 			printf("Invalid command: '%s'\n",SerialBuffer);
 		}
+		system("cls");
+		print_intro();
 	}
     
     
