@@ -1,3 +1,8 @@
+// Version 7.0 
+// All ter1minal is light green
+// Joystick and Counter on same feature
+
+
 #include <Windows.h>
 #include <stdio.h>
 #include <string.h>
@@ -14,11 +19,12 @@ void progressIndicator(char msg[]){
 	printf(".");
 	sleep(1);
 	printf(".\n");
-	sleep(1);
+	//sleep(1);
 }
 
 void print_intro(){
 	system("color 0A");
+	
 	printf("    __  __                         ___             __      _                ____       _                \n");
 	printf("   / / / /_  ______  ___  _____   /   |  _________/ /_  __(_)___  ____     / __ \\_____(_)   _____  _____\n");
 	printf("  / /_/ / / / / __ \\/ _ \\/ ___/  / /| | / ___/ __  / / / / / __ \\/ __ \\   / / / / ___/ / | / / _ \\/ ___/\n");
@@ -27,7 +33,7 @@ void print_intro(){
 	printf("      /____/_/                                                                                          \n");
 	printf("                                                                                        Author: hybrayhem\n\n\n");
 
-	printf("Please select from the following menu:\n\n");
+	printf("Please select from the following Menu:\n\n");
 	printf("(1) Turn on Led on The Arduino\n");
 	printf("(2) Turn off Led on The Arduino\n");
 	printf("(3) Flash Arduino Led 3 times\n");
@@ -37,7 +43,11 @@ void print_intro(){
 	printf("(0) Exit\n");
 	
 	printf("\nConnecting to Arduino...");
-	//printf("Enter the selection: ");
+}
+
+void print_outro(){
+	printf("\n\n");
+	printf("Game over. \n");
 }
 
 
@@ -80,14 +90,13 @@ void serial_write(HANDLE hComm, char *SerialBuffer){
 
 
 void serial_read(HANDLE hComm, int waitData, char *buffer){
-	//char buffer[64] = { 0 };
     char  ReadData;        //temperory Character
     DWORD NumberOfBytesRead;     // Bytes read by ReadFile()
     unsigned char i = 0;
     BOOL Status;
 	
-    //Read data and store in a buffer
-read:    
+read:   
+	//Read data and store in a buffer 
     do
     {
         Status = ReadFile(hComm, &ReadData, sizeof(ReadData), &NumberOfBytesRead, NULL);
@@ -95,26 +104,28 @@ read:
         ++i;
     } while (NumberOfBytesRead > 0);
     --i; //Get Actual length of received data
-    //printf("i: %d, ", i);
-    //printf("sizeof(buffer): %d\n", sizeof(buffer));
     if(i <= 0){
 	    if(waitData == 1){
 			goto read;	
 		}  
 	}
-	//printf("buffer:'%s'\n", buffer);
-	buffer[i-2] = '\0'; //trim unnecessary/wrong characters
+	buffer[i-2] = '\0'; //trim unnecessary/wrong characters, discharge buffer
 }
 
 
 
 int main(void) {
+	
+	//--------------------------Please enter port number before start--------------------------//
+	char port[] = "COM3";
+	//-----------------------------------------------------------------------------------------//
+	
 	print_intro();
 	int number;
 	int counter = 0;
 	char temp[64];
-	int old_index = 142; //center index
-	int x = 1, y = 1; //joystick values
+	int old_index = 142; //joystick_str center index
+	int x = 6, y = 5; //joystick center position
 	char cursor = '*';
 	char joystick_str[] = ". . . . . . . . . . . . .\n.                       .\n.                       .\n.                       .\n.                       .\n.           *           .\n.                       .\n.                       .\n.                       .\n.                       .\n. . . . . . . . . . . . .\n";	
 	
@@ -127,7 +138,7 @@ int main(void) {
     DWORD dwEventMask;     // Event mask to trigger
     
     ///Open the serial com port
-    hComm = CreateFileA("COM4", //friendly name
+    hComm = CreateFileA(port, //friendly name
                        GENERIC_READ | GENERIC_WRITE,      // Read/Write Access
                        0,                                 // No Sharing, ports cant be shared
                        NULL,                              // No Security
@@ -173,59 +184,44 @@ int main(void) {
     if (Status == FALSE)
     {
         printf_s("\nError to in Setting CommMask\n\n");
-        CloseHandle(hComm);
+        goto Exit1;
     }
     //Setting WaitComm() Event
     Status = WaitCommEvent(hComm, &dwEventMask, NULL); //Wait for the character to be received
     if (Status == FALSE)
     {
         printf_s("\nError! in Setting WaitCommEvent()\n\n");
-        CloseHandle(hComm);
+        goto Exit1;
     }
     
     
-    serial_read(hComm, 1, SerialBuffer);	//Reading ready message of arduino
+    serial_read(hComm, 1, SerialBuffer);	//Reading ready message from arduino
     printf(" %s\n", SerialBuffer);
     while(1){
-    	/*printf_s("\n\nEnter the selection: ");
+    	printf_s("\nEnter the selection: ");
     	scanf_s("%s", SerialBuffer, (unsigned)_countof(SerialBuffer));
-    	if(strcmp(SerialBuffer, "q") == 0){
+    	if(strcmp(SerialBuffer, "0") == 0){
     		goto Exit1;
 		}
-    	serial_write(hComm, SerialBuffer);
-    	serial_read(hComm, 1, SerialBuffer);
-    	printf("SerialBuffer: '%s'\n", SerialBuffer);*/
-    	
-    	printf_s("\n\nEnter the selection: ");
-    	scanf_s("%s", SerialBuffer, (unsigned)_countof(SerialBuffer));
-    	printf("\n");
-    	if(strcmp(SerialBuffer, "0") == 0){
-    		break;
-    		// print greetings
-		}
     	else if(strcmp(SerialBuffer, "1") == 0){
-    		printf("case1\n");
     		serial_write(hComm, SerialBuffer);
     		serial_read(hComm, 1, SerialBuffer);
-    		printf("'%s'\n", SerialBuffer);
+    		//printf("'%s'\n", SerialBuffer);
 		}
 		else if(strcmp(SerialBuffer, "2") == 0){
-			printf("case2\n");
     		serial_write(hComm, SerialBuffer);
     		serial_read(hComm, 1, SerialBuffer);
-    		printf("'%s'\n", SerialBuffer);
+    		//printf("'%s'\n", SerialBuffer);
 		}
 		else if(strcmp(SerialBuffer, "3") == 0){
-			printf("case3\n");
     		serial_write(hComm, SerialBuffer);
     		serial_read(hComm, 1, SerialBuffer);
-    		printf("'%s'\n", SerialBuffer);
+    		//printf("'%s'\n", SerialBuffer);
 		}
 		else if(strcmp(SerialBuffer, "4") == 0){
-			printf("case4\n");
     		printf("Enter the number you want to get square: ");
     		scanf("%s", temp);
-    		SerialBuffer[0] = '4';
+    		SerialBuffer[0] = '4';	//key of square function on arduino
     		strncat(SerialBuffer, temp, sizeof(temp));
     		
     		serial_write(hComm, SerialBuffer);
@@ -233,7 +229,7 @@ int main(void) {
     		printf("Result = '%s'\n", SerialBuffer);
 		}
 		else if(strcmp(SerialBuffer, "5") == 0){
-			printf("Press 0 to exit to menu.\n");
+			printf("# PRESS 0 TO RETURN MENU #\n");
 			serial_write(hComm, SerialBuffer);
 			char ch;
 			counter = 0;
@@ -244,13 +240,12 @@ int main(void) {
 		            // Terminates the loop when escape is pressed 
 		            if (ch == '0'){
 		            	serial_write(hComm, "9");
-		            	serial_read(hComm, 1, SerialBuffer); //for waiting end message from arduino of joystick data stream
+		            	serial_read(hComm, 1, SerialBuffer); //for waiting end message from joystick data stream of arduino
 					    break;
 					}	    
 				}
 				serial_read(hComm, 0, SerialBuffer);
 				if(SerialBuffer[0] != '\0'){
-					printf("SerialBuffer: '%s'\n", SerialBuffer);
 					if(SerialBuffer[0] == '+'){
 						counter++;
 						cursor = '+';
@@ -259,15 +254,16 @@ int main(void) {
 						cursor = '*';
 					}else{
 						int number = atoi(SerialBuffer);
-						x = map(number / 10, 1, 9, 1, 11);
-						y = number % 10;
-						printf("%d,%d\n",x,y);
+						if(number > 0){
+							x = map(number / 10, 1, 9, 1, 11);
+							y = number % 10;
+						}
 					}
 					move_cursor(joystick_str, cursor, old_index, x, y);
 					old_index = joystick_index(x, y);
 					printf("%s", joystick_str);
 					
-					printf("\nYou have pressed button %d times.\n", counter);
+					printf("\nYou have pressed button %d times.\n\n", counter);
 				}
 			}
 		}
@@ -276,11 +272,9 @@ int main(void) {
 			
     		srand(time(NULL));
 			int x = rand() % 9 + 1;
-			//printf("x: %d\n",x);
 			itoa(x, temp, 10);
-			//printf("temp: %s\n",temp);
+			SerialBuffer[0] = '6';	//key of blink function on arduino
 			strncat(SerialBuffer, temp, sizeof(temp));
-			//printf("SerialBuffer: %s\n",SerialBuffer);
 			
     		progressIndicator("A random blink is coming");
 			serial_write(hComm, SerialBuffer);
@@ -303,6 +297,7 @@ int main(void) {
 Exit1:
     CloseHandle(hComm);//Closing the Serial Port
 Exit2:
-    //system("pause");
+    print_outro();
+    getch();
     return 0;
 }
