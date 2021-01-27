@@ -1,4 +1,4 @@
-// Version 9.0 
+// Version 10.0 
 // Terminal has various color
 // Counter and joystick are completely seperated
 
@@ -27,7 +27,7 @@ void progressIndicator(char msg[]){
 	printf(".");
 	sleep(1);
 	printf(".\n");
-	//sleep(1);
+	sleep(1);
 }
 
 void print_intro(){
@@ -47,8 +47,10 @@ void print_intro(){
 	cPrint("(3) ", 14); cPrint("Flash Arduino Led 3 times\n", 11);
 	cPrint("(4) ", 14); cPrint("Send a number to Arduino for compute square in it\n", 11);
 	cPrint("(5) ", 14); cPrint("Button Press Counter\n", 11);
-	cPrint("(6) ", 14); cPrint("LED Blink Counting game\n", 11);
-	cPrint("(7) ", 14); cPrint("The Ultimate Joystick Visualizer\n", 13);
+	cPrint("(6) ", 14); cPrint("LED Blink Counting Game\n", 11);
+	cPrint("(7) ", 14); cPrint("Paint Board\n", 11);
+	cPrint("(8) ", 14); cPrint("The Ultimate Joystick Visualizer\n", 13);
+	cPrint("(9) ", 14); cPrint("Laser Ruler\n", 13);
 	cPrint("(0) ", 12); cPrint("Exit\n", 12);
 	
 	printf("\nConnecting to Arduino...");
@@ -56,9 +58,44 @@ void print_intro(){
 
 void print_outro(){
 	printf("\n\n");
-	cPrint("Game over. \n", 12);
+	cPrint("Game over. \n", 15); 	       
 }
 
+print_ruler(int distance){ // 20mm to 1200mm, displays 1 to 98
+	int i;
+	printf("\r");
+	for(i=0; i<distance/12; i++){
+		printf("-");
+	}
+	printf("| %dmm",distance);
+	
+	int space = 70 - (space/12);	// for long range 107 - (space/12)
+	for(i=0; i<space; i++){
+		printf(" ");
+	}
+	//printf("*",distance);
+}
+
+/*	PRINT RULER - COLOR VERSION
+
+print_ruler(int distance, int color){ // 20mm to 1200mm, displays 1 to 98
+	int i;
+	char d[8];
+	printf("\r");
+	for(i=0; i<distance/12; i++){
+		cPrint("-", color);
+	}
+	//printf("| %dmm",distance);
+	itoa(distance, d, 5);
+	cPrint("| ", color); cPrint(d, color); cPrint("mm", color);
+	
+	int space = 70 - (space/12);	// for long range 107 - (space/12)
+	for(i=0; i<space; i++){
+		printf(" ");
+	}
+	//printf("*",distance);
+}
+*/
 
 int map(int x, int in_min, int in_max, int out_min, int out_max){
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
@@ -68,10 +105,23 @@ int joystick_index(int x, int y){
 	return y*26 + x*2;
 }
 
-void move_cursor(char *joystick_str, char cursor, int old_index, int new_x, int new_y){
-	joystick_str[old_index] = ' ';
+void move_cursor(char *joystick_str, char cursor, int old_index, int new_x, int new_y, int is_painting, char painter){
+	if(is_painting == 0){
+		joystick_str[old_index] = ' ';
+	}else{
+		joystick_str[old_index] = painter;	
+	}
 	int new_index = joystick_index(new_x, new_y);
 	joystick_str[new_index] = cursor;
+}
+
+void reset_board(char *joystick_str){
+	int x, y;
+	for(x=1; x <= 11; x++){
+		for(y=1; y<=9; y++){
+			move_cursor(joystick_str, ' ', 142, x, y, 0, ' ');
+		}
+	}
 }
 
 
@@ -244,6 +294,7 @@ int main(void) {
 			serial_write(hComm, SerialBuffer);
 			char ch;
 			counter = 0;
+			printf("You have pressed button %d times.", counter);
 			while(1){
 				if(kbhit()){
 					// Stores the pressed key in ch 
@@ -290,6 +341,48 @@ int main(void) {
 			printf("# PRESS 0 TO RETURN MENU #\n");
 			serial_write(hComm, "5");  // command 5 because joystick and counter feature working on same time on arduino
 			char ch;
+			int is_painting = 0;
+			cursor = '-';
+			while(1){
+				if(kbhit()){
+					// Stores the pressed key in ch 
+		            ch = getch(); 
+		            // Terminates the loop when escape is pressed 
+		            if (ch == '0'){
+		            	serial_write(hComm, "9");
+		            	serial_read(hComm, 1, SerialBuffer); //for waiting end message from joystick data stream of arduino
+		            	reset_board(joystick_str);
+					    break;
+					}	    
+				}
+				serial_read(hComm, 0, SerialBuffer);
+				if(SerialBuffer[0] != '\0'){
+					if(SerialBuffer[0] == '+'){
+						is_painting = is_painting ^ 1;
+						if(is_painting == 1){
+							cursor = '+';
+						}else{
+							cursor = '-';
+						}
+					}
+					else{
+						int number = atoi(SerialBuffer);
+						if(number > 0){
+							x = map(number / 10, 1, 9, 1, 11);
+							y = number % 10;
+						}
+					}
+					move_cursor(joystick_str, cursor, old_index, x, y, is_painting, '*');
+					old_index = joystick_index(x, y);
+					cPrint(joystick_str, 11);
+				}
+			}
+		}
+		else if(strcmp(SerialBuffer, "8") == 0){
+			printf("# PRESS 0 TO RETURN MENU #\n");
+			serial_write(hComm, "5");  // command 5 because joystick and counter feature working on same time on arduino
+			char ch;
+			cursor = '*';
 			while(1){
 				if(kbhit()){
 					// Stores the pressed key in ch 
@@ -306,7 +399,7 @@ int main(void) {
 					if(SerialBuffer[0] == '+'){
 						cursor = '+';
 					}
-					if(SerialBuffer[0] == '*'){
+					else if(SerialBuffer[0] == '*'){
 						cursor = '*';
 					}else{
 						int number = atoi(SerialBuffer);
@@ -315,12 +408,40 @@ int main(void) {
 							y = number % 10;
 						}
 					}
-					move_cursor(joystick_str, cursor, old_index, x, y);
+					move_cursor(joystick_str, cursor, old_index, x, y, 0, ' ');
 					old_index = joystick_index(x, y);
 					cPrint(joystick_str, 13);
 					//printf("\n");
 				}
 			}
+		}
+		else if(strcmp(SerialBuffer, "9") == 0){
+			printf("# PRESS 0 TO RETURN MENU #\n\n");
+			serial_write(hComm, SerialBuffer);
+			char ch;
+			counter = 0;
+			while(1){
+				if(kbhit()){
+					// Stores the pressed key in ch 
+		            ch = getch(); 
+		            // Terminates the loop when escape is pressed 
+		            if (ch == '0'){
+		            	serial_write(hComm, "9");
+		            	serial_read(hComm, 1, SerialBuffer); //for waiting end message from joystick data stream of arduino
+					    break;
+					}	    
+				}
+				serial_read(hComm, 0, SerialBuffer);
+				if(SerialBuffer[0] != '\0'){
+					if(SerialBuffer[0] == '+'){
+						printf("\rOut of range.                                                                                              ");	// for cleaning whole line
+					}else{
+						int distance = atoi(SerialBuffer);
+						print_ruler(distance);
+					}
+				}
+			}
+			printf("\n");
 		}
 		else{
 			printf("Invalid value: '%s'\n",SerialBuffer);
