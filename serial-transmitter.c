@@ -1,6 +1,6 @@
-// Version 8.0 
+// Version 9.0 
 // Terminal has various color
-// Joystick feature copied to 7 and removed from 5
+// Counter and joystick are completely seperated
 
 
 #include <Windows.h>
@@ -136,7 +136,7 @@ int main(void) {
 	int old_index = 142; //joystick_str center index
 	int x = 6, y = 5; //joystick center position
 	char cursor = '*';
-	char joystick_str[] = ". . . . . . . . . . . . .\n.                       .\n.                       .\n.                       .\n.                       .\n.           *           .\n.                       .\n.                       .\n.                       .\n.                       .\n. . . . . . . . . . . . .\n";	
+	char joystick_str[] = ". . . . . . . . . . . . .\n.                       .\n.                       .\n.                       .\n.                       .\n.           *           .\n.                       .\n.                       .\n.                       .\n.                       .\n. . . . . . . . . . . . .\n\n";	
 	
 	
     HANDLE hComm;  // Handle to the Serial port
@@ -290,7 +290,6 @@ int main(void) {
 			printf("# PRESS 0 TO RETURN MENU #\n");
 			serial_write(hComm, "5");  // command 5 because joystick and counter feature working on same time on arduino
 			char ch;
-			counter = 0;
 			while(1){
 				if(kbhit()){
 					// Stores the pressed key in ch 
@@ -305,7 +304,6 @@ int main(void) {
 				serial_read(hComm, 0, SerialBuffer);
 				if(SerialBuffer[0] != '\0'){
 					if(SerialBuffer[0] == '+'){
-						counter++;
 						cursor = '+';
 					}
 					if(SerialBuffer[0] == '*'){
@@ -320,8 +318,7 @@ int main(void) {
 					move_cursor(joystick_str, cursor, old_index, x, y);
 					old_index = joystick_index(x, y);
 					cPrint(joystick_str, 13);
-					
-					printf("\nYou have pressed button %d times.\n\n", counter);
+					//printf("\n");
 				}
 			}
 		}
