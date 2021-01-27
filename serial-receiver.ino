@@ -46,15 +46,18 @@ void loop() {
        delay(50); 
        Serial.println("BONUS!!!!");
        while(1){
+        int stop_command = Serial.read();
+          if(stop_command == 57){  //equals 9 in decimal
+            old_xMap = 0; //reset old values for next requests
+            old_yMap = 0;
+            break;
+          }
           int switchState = digitalRead(switchPin);
           if (switchState != lastSwitchState) {
             if (switchState == LOW) {
               Serial.println("+");
             }
-            if (switchState == LOW && xMap == 1 && yMap == 5){
-              Serial.println("break");
-              break;
-            }
+            delay(100);
           }else{
             xValue = analogRead(xAxis);
             yValue = analogRead(yAxis);
@@ -66,8 +69,8 @@ void loop() {
             }
             old_xMap = xMap;
             old_yMap = yMap;
+            delay(100);
           }
-          delay(100);
           lastSwitchState = switchState;
        }
        Serial.println("end of bonus");
