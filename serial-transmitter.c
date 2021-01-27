@@ -1,4 +1,4 @@
-// Version 10.0 
+// Version 11.0 
 // Terminal has various color
 // Counter and joystick are completely seperated
 
@@ -51,6 +51,8 @@ void print_intro(){
 	cPrint("(7) ", 14); cPrint("Paint Board\n", 11);
 	cPrint("(8) ", 14); cPrint("The Ultimate Joystick Visualizer\n", 13);
 	cPrint("(9) ", 14); cPrint("Laser Ruler\n", 13);
+	cPrint("(10) ", 14); cPrint("Control RGB Led with Hex colors\n", 13);
+	cPrint("(11) ", 14); cPrint("Distance to RGB\n", 13);
 	cPrint("(0) ", 12); cPrint("Exit\n", 12);
 	
 	printf("\nConnecting to Arduino...");
@@ -58,7 +60,7 @@ void print_intro(){
 
 void print_outro(){
 	printf("\n\n");
-	cPrint("Game over. \n", 15); 	       
+	cPrint("Game over. \n", 12); 	       
 }
 
 print_ruler(int distance){ // 20mm to 1200mm, displays 1 to 98
@@ -96,6 +98,15 @@ print_ruler(int distance, int color){ // 20mm to 1200mm, displays 1 to 98
 	//printf("*",distance);
 }
 */
+
+int hex2rgbCommand(char color[]){
+	long int number =  strtol(&color[0], NULL, 16);
+  	long int r = number >> 16;
+  	long int g = number >> 8 & 0xFF;
+  	long int b = number & 0xFF;
+  	int rgb = b + g*1000 + r*1000000;
+  	return (-1)*(rgb + 1000000000);	//convert rgb value to arduino command
+}
 
 int map(int x, int in_min, int in_max, int out_min, int out_max){
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
@@ -417,7 +428,7 @@ int main(void) {
 		}
 		else if(strcmp(SerialBuffer, "9") == 0){
 			printf("# PRESS 0 TO RETURN MENU #\n\n");
-			serial_write(hComm, SerialBuffer);
+			serial_write(hComm, "7");	// 7 starts rgb in arduino
 			char ch;
 			counter = 0;
 			while(1){
@@ -442,6 +453,54 @@ int main(void) {
 				}
 			}
 			printf("\n");
+		}
+		else if(strcmp(SerialBuffer, "10") == 0){
+			char color[6];
+			printf("Enter the HEX Color value: #");
+			scanf("%s", color);
+			int rgb = hex2rgbCommand(color);	// in arduino side, negative commands controls the rgb
+			itoa(rgb, SerialBuffer, 10);
+			printf("value: '%s'\n",SerialBuffer);
+			serial_write(hComm, SerialBuffer);
+			serial_read(hComm, 1, SerialBuffer);
+			printf("value: '%s'\n",SerialBuffer);
+		}
+		else if(strcmp(SerialBuffer, "11") == 0){
+			printf("# PRESS 0 TO RETURN MENU #\n\n");
+			serial_write(hComm, "8");	// 7 starts rgb in arduino
+			char ch;
+			counter = 0;
+			
+			cPrint("  o       ", 12); //
+			cPrint("o                     ",14);    // 80 mm
+			cPrint("o                 ", 10);   //320mm
+			cPrint("o              ", 11);   //650mm
+			cPrint("o                    ", 9);    //
+			cPrint("o                    \n", 13);   //
+			
+			while(1){
+				if(kbhit()){
+					// Stores the pressed key in ch 
+		            ch = getch(); 
+		            // Terminates the loop when escape is pressed 
+		            if (ch == '0'){
+		            	serial_write(hComm, "9");
+		            	serial_read(hComm, 1, SerialBuffer); //for waiting end message from joystick data stream of arduino
+					    break;
+					}	    
+				}
+				serial_read(hComm, 0, SerialBuffer);
+				if(SerialBuffer[0] != '\0'){
+					if(SerialBuffer[0] == '+'){
+						printf("\rOut of range.                                                                                              ");	// for cleaning whole line
+					}else{
+						int distance = atoi(SerialBuffer);
+						print_ruler(distance);
+					}
+				}
+			}
+			printf("\n");
+			
 		}
 		else{
 			printf("Invalid value: '%s'\n",SerialBuffer);
