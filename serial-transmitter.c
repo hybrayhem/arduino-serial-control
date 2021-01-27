@@ -1,8 +1,8 @@
 #include <Windows.h>
 #include <stdio.h>
 #include <string.h>
-int main(void)
-{
+int main(void) {
+	
     HANDLE hComm;  // Handle to the Serial port
     BOOL   Status; // Status
     DCB dcbSerialParams = { 0 };  // Initializing DCB structure
@@ -13,13 +13,6 @@ int main(void)
     char  ReadData;        //temperory Character
     DWORD NoBytesRead;     // Bytes read by ReadFile()
     unsigned char loop = 0;
-    wchar_t pszPortName[10] = { 0 }; //com port id
-    wchar_t PortNo[20] = { 0 }; //contain friendly name
-    
-    //Enter the com port id 	<WORKS WITHOUT THIS>
-    //printf_s("Enter the Com Port: ");
-    //wscanf_s(L"%s", pszPortName, (unsigned)_countof(pszPortName));
-    //swprintf_s(PortNo, 20, L"\\\\.\\%s", pszPortName);
     
     ///Open the serial com port
     hComm = CreateFileA("COM5", //friendly name
@@ -63,6 +56,12 @@ int main(void)
         printf_s("\nError to Setting Time outs");
         goto Exit1;
     }
+    
+    
+    
+    
+    
+    
     printf_s("\n\nEnter your message: ");
     scanf_s("%s", SerialBuffer, (unsigned)_countof(SerialBuffer));
     //Writing data to Serial Port
@@ -78,6 +77,27 @@ int main(void)
     }
     //print numbers of byte written to the serial port
     printf_s("\nNumber of bytes written to the serial port = %d\n\n", BytesWritten);
+    
+    
+    printf_s("\n\nEnter your message: ");
+    scanf_s("%s", SerialBuffer, (unsigned)_countof(SerialBuffer));
+    //Writing data to Serial Port
+    Status = WriteFile(hComm,// Handle to the Serialport
+                       SerialBuffer,            // Data to be written to the port
+                       sizeof(SerialBuffer),   // No of bytes to write into the port
+                       &BytesWritten,  // No of bytes written to the port
+                       NULL);
+    if (Status == FALSE)
+    {
+        printf_s("\nFail to Written");
+        goto Exit1;
+    }
+    //print numbers of byte written to the serial port
+    printf_s("\nNumber of bytes written to the serial port = %d\n\n", BytesWritten);
+    
+    
+    
+    
     //Setting Receive Mask
     Status = SetCommMask(hComm, EV_RXCHAR);
     if (Status == FALSE)
@@ -110,6 +130,7 @@ int main(void)
         printf_s("%c", SerialBuffer[index]);
     }
     printf_s("\n\n");
+    
 Exit1:
     CloseHandle(hComm);//Closing the Serial Port
 Exit2:
