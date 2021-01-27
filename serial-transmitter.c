@@ -33,11 +33,28 @@ void print_intro(){
 	printf("(3) Flash Arduino Led 3 times\n");
 	printf("(4) Send a number to Arduino for compute square in it\n");
 	printf("(5) Button press counter with The Ultimate Joystick Visualizer\n");
-	printf("(6) Led Blink counting game\n");
+	printf("(6) LED Blink Counting game\n");
 	printf("(0) Exit\n");
 	
+	printf("\nConnecting to Arduino...");
 	//printf("Enter the selection: ");
 }
+
+
+int map(int x, int in_min, int in_max, int out_min, int out_max){
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+int joystick_index(int x, int y){
+	return y*26 + x*2;
+}
+
+void move_cursor(char *joystick_str, char cursor, int old_index, int new_x, int new_y){
+	joystick_str[old_index] = ' ';
+	int new_index = joystick_index(new_x, new_y);
+	joystick_str[new_index] = cursor;
+}
+
 
 void serial_write(HANDLE hComm, char *SerialBuffer){
 	DWORD BytesWritten = 0;
@@ -62,42 +79,45 @@ void serial_write(HANDLE hComm, char *SerialBuffer){
 }
 
 
-
-void serial_read(HANDLE hComm, int waitData){
-	char buffer[64] = { 0 };
+void serial_read(HANDLE hComm, int waitData, char *buffer){
+	//char buffer[64] = { 0 };
     char  ReadData;        //temperory Character
-    DWORD NoBytesRead;     // Bytes read by ReadFile()
-    unsigned char loop = 0;
+    DWORD NumberOfBytesRead;     // Bytes read by ReadFile()
+    unsigned char i = 0;
     BOOL Status;
 	
     //Read data and store in a buffer
 read:    
     do
     {
-        Status = ReadFile(hComm, &ReadData, sizeof(ReadData), &NoBytesRead, NULL);
-        buffer[loop] = ReadData;
-        ++loop;
-    } while (NoBytesRead > 0);
-    --loop; //Get Actual length of received data
-    if(loop > 0){
-	    //printf("data: '%s' \n\n", buffer);
-	    printf("'%s'\n", buffer);
-	}else{
-		//printf("Buffer is empty.\n");
-		if(waitData == 1){
+        Status = ReadFile(hComm, &ReadData, sizeof(ReadData), &NumberOfBytesRead, NULL);
+        buffer[i] = ReadData;
+        ++i;
+    } while (NumberOfBytesRead > 0);
+    --i; //Get Actual length of received data
+    //printf("i: %d, ", i);
+    //printf("sizeof(buffer): %d\n", sizeof(buffer));
+    if(i <= 0){
+	    if(waitData == 1){
 			goto read;	
-		}
+		}  
 	}
+	//printf("buffer:'%s'\n", buffer);
+	buffer[i-2] = '\0'; //trim unnecessary/wrong characters
 }
 
 
 
 int main(void) {
 	print_intro();
-	printf("\nConnecting to Arduino... ");
 	int number;
-	char command[64];
+	int counter = 0;
 	char temp[64];
+	int old_index = 142; //center index
+	int x = 1, y = 1; //joystick values
+	char cursor = '*';
+	char joystick_str[] = ". . . . . . . . . . . . .\n.                       .\n.                       .\n.                       .\n.                       .\n.           *           .\n.                       .\n.                       .\n.                       .\n.                       .\n. . . . . . . . . . . . .\n";	
+	
 	
     HANDLE hComm;  // Handle to the Serial port
     BOOL   Status; // Status
@@ -107,7 +127,7 @@ int main(void) {
     DWORD dwEventMask;     // Event mask to trigger
     
     ///Open the serial com port
-    hComm = CreateFileA("COM7", //friendly name
+    hComm = CreateFileA("COM4", //friendly name
                        GENERIC_READ | GENERIC_WRITE,      // Read/Write Access
                        0,                                 // No Sharing, ports cant be shared
                        NULL,                              // No Security
@@ -164,7 +184,8 @@ int main(void) {
     }
     
     
-    serial_read(hComm, 1);	//Reading ready message of arduino
+    serial_read(hComm, 1, SerialBuffer);	//Reading ready message of arduino
+    printf(" %s\n", SerialBuffer);
     while(1){
     	/*printf_s("\n\nEnter the selection: ");
     	scanf_s("%s", SerialBuffer, (unsigned)_countof(SerialBuffer));
@@ -172,11 +193,8 @@ int main(void) {
     		goto Exit1;
 		}
     	serial_write(hComm, SerialBuffer);
-    	serial_write(hComm, "1");
-    	serial_read(hComm);
-    	
-    	serial_write(hComm, "2");
-    	serial_read(hComm);*/
+    	serial_read(hComm, 1, SerialBuffer);
+    	printf("SerialBuffer: '%s'\n", SerialBuffer);*/
     	
     	printf_s("\n\nEnter the selection: ");
     	scanf_s("%s", SerialBuffer, (unsigned)_countof(SerialBuffer));
@@ -188,17 +206,20 @@ int main(void) {
     	else if(strcmp(SerialBuffer, "1") == 0){
     		printf("case1\n");
     		serial_write(hComm, SerialBuffer);
-    		serial_read(hComm, 1);
+    		serial_read(hComm, 1, SerialBuffer);
+    		printf("'%s'\n", SerialBuffer);
 		}
 		else if(strcmp(SerialBuffer, "2") == 0){
 			printf("case2\n");
     		serial_write(hComm, SerialBuffer);
-    		serial_read(hComm, 1);
+    		serial_read(hComm, 1, SerialBuffer);
+    		printf("'%s'\n", SerialBuffer);
 		}
 		else if(strcmp(SerialBuffer, "3") == 0){
 			printf("case3\n");
     		serial_write(hComm, SerialBuffer);
-    		serial_read(hComm, 1);
+    		serial_read(hComm, 1, SerialBuffer);
+    		printf("'%s'\n", SerialBuffer);
 		}
 		else if(strcmp(SerialBuffer, "4") == 0){
 			printf("case4\n");
@@ -207,53 +228,72 @@ int main(void) {
     		SerialBuffer[0] = '4';
     		strncat(SerialBuffer, temp, sizeof(temp));
     		
-    		printf("SerialBuffer: %s\n", SerialBuffer);
     		serial_write(hComm, SerialBuffer);
-    		serial_read(hComm, 1);
-    		//printf(incoming data);
+    		serial_read(hComm, 1, SerialBuffer);
+    		printf("Result = '%s'\n", SerialBuffer);
 		}
 		else if(strcmp(SerialBuffer, "5") == 0){
-			printf("case5 Press 0 to exit to menu.\n");
+			printf("Press 0 to exit to menu.\n");
 			serial_write(hComm, SerialBuffer);
 			char ch;
+			counter = 0;
 			while(1){
-				//printf("continue\n");
 				if(kbhit()){
 					// Stores the pressed key in ch 
 		            ch = getch(); 
 		            // Terminates the loop when escape is pressed 
 		            if (ch == '0'){
 		            	serial_write(hComm, "9");
-		            	serial_read(hComm, 1);
+		            	serial_read(hComm, 1, SerialBuffer); //for waiting end message from arduino of joystick data stream
 					    break;
 					}	    
 				}
-				serial_read(hComm, 0);
+				serial_read(hComm, 0, SerialBuffer);
+				if(SerialBuffer[0] != '\0'){
+					printf("SerialBuffer: '%s'\n", SerialBuffer);
+					if(SerialBuffer[0] == '+'){
+						counter++;
+						cursor = '+';
+					}
+					if(SerialBuffer[0] == '*'){
+						cursor = '*';
+					}else{
+						int number = atoi(SerialBuffer);
+						x = map(number / 10, 1, 9, 1, 11);
+						y = number % 10;
+						printf("%d,%d\n",x,y);
+					}
+					move_cursor(joystick_str, cursor, old_index, x, y);
+					old_index = joystick_index(x, y);
+					printf("%s", joystick_str);
+					
+					printf("\nYou have pressed button %d times.\n", counter);
+				}
 			}
 		}
 		else if(strcmp(SerialBuffer, "6") == 0){
+			printf("Welcome to the LED Blink Counting game :)\n");
 			
-			//send 65, 5 times blink
-    		printf("case6\n");
     		srand(time(NULL));
 			int x = rand() % 9 + 1;
-			printf("x: %d\n",x);
+			//printf("x: %d\n",x);
 			itoa(x, temp, 10);
-			printf("temp: %s\n",temp);
+			//printf("temp: %s\n",temp);
 			strncat(SerialBuffer, temp, sizeof(temp));
-			printf("SerialBuffer: %s\n",SerialBuffer);
+			//printf("SerialBuffer: %s\n",SerialBuffer);
 			
-			printf("The Led on Arduino will blink randomly, please count\n");
-    		progressIndicator("Starting");
+    		progressIndicator("A random blink is coming");
 			serial_write(hComm, SerialBuffer);
-			serial_read(hComm, 1);
-			printf("Enter the number of blinks: \n");
+			serial_read(hComm, 1, SerialBuffer);
+			printf("Enter the number of blinks: ");
 			scanf("%d", &number);
+			printf("\n");
 			if(number == x){
 				printf("Correct!\n");
 			}else{
-				printf("Wrong! The answer was %d.", x);
+				printf("Wrong! The answer was %d.\n", x);
 			}
+			
 		}else{
 			printf("Invalid value: '%s'\n",SerialBuffer);
 		}
@@ -263,6 +303,6 @@ int main(void) {
 Exit1:
     CloseHandle(hComm);//Closing the Serial Port
 Exit2:
-    system("pause");
+    //system("pause");
     return 0;
 }
