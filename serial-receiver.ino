@@ -1,7 +1,7 @@
 const int switchPin = 2;      
 const int xAxis = A0;         
 const int yAxis = A1;         
-int lastSwitchState = LOW;
+int lastSwitchState = HIGH;
 int xMap, yMap, old_xMap, old_yMap, xValue, yValue;
 
 void setup() {
@@ -33,7 +33,7 @@ void loop() {
       else if (command == 3)
       {
        led_blink(3, 300);
-       Serial.println("blinked");
+       Serial.println("BLINK");
       }
       else if (str_command.startsWith("4"))
       {
@@ -44,7 +44,6 @@ void loop() {
       else if (command == 5)
       {
        delay(50); 
-       Serial.println("BONUS!!!!");
        while(1){
         int stop_command = Serial.read();
           if(stop_command == 57){  //equals 9 in decimal
@@ -56,6 +55,9 @@ void loop() {
           if (switchState != lastSwitchState) {
             if (switchState == LOW) {
               Serial.println("+");
+            }
+            if (switchState == HIGH) {
+              Serial.println("*");
             }
             delay(100);
           }else{
@@ -73,18 +75,12 @@ void loop() {
           }
           lastSwitchState = switchState;
        }
-       Serial.println("end of bonus");
+       Serial.println("END");
       }
       else if (str_command.startsWith("6")){
         int times = str_command.substring(1).toInt();
         led_blink(times, 300);
-        Serial.println("blinked");
-      }
-      else{
-        if(command != 0){
-          Serial.print("Invalid:  ");
-          Serial.println(command);
-        }
+        Serial.println("BLINK");
       }
     }
 }
