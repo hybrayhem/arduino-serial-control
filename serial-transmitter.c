@@ -1,7 +1,8 @@
-// Version 11.0 
-// Terminal has various color
-// Counter and joystick are completely seperated
+// Version 12.0 
+// terminal renkleri yesil yapildi
+// hex ozelligi silindi
 
+// clear eklenecek
 
 #include <Windows.h>
 #include <stdio.h>
@@ -11,7 +12,7 @@
 #include <stdlib.h>
 #include <conio.h> 
 
-cPrint(char msg[], int k){
+colorprint(char msg[], int k){
 	HANDLE  hConsole;
 	hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hConsole, k);
@@ -31,29 +32,27 @@ void progressIndicator(char msg[]){
 }
 
 void print_intro(){
-	//system("color 0A");
 	
-	cPrint("    __  __                         ___             __      _                ____       _                \n", 10);
-	cPrint("   / / / /_  ______  ___  _____   /   |  _________/ /_  __(_)___  ____     / __ \\_____(_)   _____  _____\n", 10);
-	cPrint("  / /_/ / / / / __ \\/ _ \\/ ___/  / /| | / ___/ __  / / / / / __ \\/ __ \\   / / / / ___/ / | / / _ \\/ ___/\n", 10);
-	cPrint(" / __  / /_/ / /_/ /  __/ /     / ___ |/ /  / /_/ / /_/ / / / / / /_/ /  / /_/ / /  / /| |/ /  __/ /    \n", 10);
-	cPrint("/_/ /_/\\__, / .___/\\___/_/     /_/  |_/_/   \\__,_/\\__,_/_/_/ /_/\\____/  /_____/_/  /_/ |___/\\___/_/     \n", 10);
-	cPrint("      /____/_/                                                                                          \n", 10);
-	cPrint("                                                                                        Author: hybrayhem\n\n\n\n", 10);
+	colorprint("    __  __                         ___             __      _                ____       _                \n", 10);
+	colorprint("   / / / /_  ______  ___  _____   /   |  _________/ /_  __(_)___  ____     / __ \\_____(_)   _____  _____\n", 10);
+	colorprint("  / /_/ / / / / __ \\/ _ \\/ ___/  / /| | / ___/ __  / / / / / __ \\/ __ \\   / / / / ___/ / | / / _ \\/ ___/\n", 10);
+	colorprint(" / __  / /_/ / /_/ /  __/ /     / ___ |/ /  / /_/ / /_/ / / / / / /_/ /  / /_/ / /  / /| |/ /  __/ /    \n", 10);
+	colorprint("/_/ /_/\\__, / .___/\\___/_/     /_/  |_/_/   \\__,_/\\__,_/_/_/ /_/\\____/  /_____/_/  /_/ |___/\\___/_/     \n", 10);
+	colorprint("      /____/_/                                                                                          \n", 10);
+	colorprint("                                                                                        Author: hybrayhem\n\n\n\n", 10);
 
-	cPrint("Please select from the following Menu:\n\n", 14);
-	cPrint("(1) ", 14);	cPrint("Turn ON Led on The Arduino\n", 11);
-	cPrint("(2) ", 14); cPrint("Turn OFF Led on The Arduino\n", 11);
-	cPrint("(3) ", 14); cPrint("Flash Arduino Led 3 times\n", 11);
-	cPrint("(4) ", 14); cPrint("Send a number to Arduino for compute square in it\n", 11);
-	cPrint("(5) ", 14); cPrint("Button Press Counter\n", 11);
-	cPrint("(6) ", 14); cPrint("LED Blink Counting Game\n", 11);
-	cPrint("(7) ", 14); cPrint("Paint Board\n", 11);
-	cPrint("(8) ", 14); cPrint("The Ultimate Joystick Visualizer\n", 13);
-	cPrint("(9) ", 14); cPrint("Laser Ruler\n", 13);
-	cPrint("(10) ", 14); cPrint("Control RGB Led with Hex colors\n", 13);
-	cPrint("(11) ", 14); cPrint("Distance to RGB\n", 13);
-	cPrint("(0) ", 12); cPrint("Exit\n", 12);
+	colorprint("Please select from the following Menu:\n\n", 14);
+	colorprint("(1)  ", 14); colorprint("Turn ON Led on The Arduino\n", 11);
+	colorprint("(2)  ", 14); colorprint("Turn OFF Led on The Arduino\n", 11);
+	colorprint("(3)  ", 14); colorprint("Flash Arduino Led 3 times\n", 11);
+	colorprint("(4)  ", 14); colorprint("Send a number to Arduino for compute square in it\n", 11);
+	colorprint("(5)  ", 14); colorprint("Button Press Counter\n", 11);
+	colorprint("(6)  ", 14); colorprint("LED Blink Counting Game\n", 11);
+	colorprint("(7)  ", 14); colorprint("Paint Board\n", 11);
+	colorprint("(8)  ", 14); colorprint("The Ultimate Joystick Visualizer\n", 13);
+	colorprint("(9)  ", 14); colorprint("Laser Ruler\n", 11);
+	colorprint("(10) ", 14); colorprint("Distance Hue\n", 11);
+	colorprint("(0)  ", 12); colorprint("Exit\n", 12);
 	
 	printf("\nConnecting to Arduino...");
 }
@@ -76,36 +75,6 @@ print_ruler(int distance){ // 20mm to 1200mm, displays 1 to 98
 		printf(" ");
 	}
 	//printf("*",distance);
-}
-
-/*	PRINT RULER - COLOR VERSION
-
-print_ruler(int distance, int color){ // 20mm to 1200mm, displays 1 to 98
-	int i;
-	char d[8];
-	printf("\r");
-	for(i=0; i<distance/12; i++){
-		cPrint("-", color);
-	}
-	//printf("| %dmm",distance);
-	itoa(distance, d, 5);
-	cPrint("| ", color); cPrint(d, color); cPrint("mm", color);
-	
-	int space = 70 - (space/12);	// for long range 107 - (space/12)
-	for(i=0; i<space; i++){
-		printf(" ");
-	}
-	//printf("*",distance);
-}
-*/
-
-int hex2rgbCommand(char color[]){
-	long int number =  strtol(&color[0], NULL, 16);
-  	long int r = number >> 16;
-  	long int g = number >> 8 & 0xFF;
-  	long int b = number & 0xFF;
-  	int rgb = b + g*1000 + r*1000000;
-  	return (-1)*(rgb + 1000000000);	//convert rgb value to arduino command
 }
 
 int map(int x, int in_min, int in_max, int out_min, int out_max){
@@ -147,15 +116,13 @@ void serial_write(HANDLE hComm, char *SerialBuffer){
     if (Status == FALSE)
     {
         printf_s("\nFail to Written");
-        CloseHandle(hComm);//Closing the Serial Port
+        CloseHandle(hComm); //Closing the Serial Port
     }
     if (BytesWritten != sizeof(SerialBuffer))
 	{
 	    printf_s("Failed to write all bytes to port");
 	    CloseHandle(hComm);//Closing the Serial Port
 	}
-    //print numbers of byte written to the serial port
-    //printf_s("\nNumber of bytes written to the serial port = %d\n\n", BytesWritten);
 }
 
 
@@ -266,11 +233,9 @@ int main(void) {
     
     
     serial_read(hComm, 1, SerialBuffer);	//Reading ready message from arduino
-    
     printf(" %s\n", SerialBuffer);
     while(1){
-    	//printf_s("\nEnter the selection: ");
-    	cPrint("\nEnter the selection: ", 7);
+    	colorprint("\nEnter the selection: ", 7);
     	scanf_s("%s", SerialBuffer, (unsigned)_countof(SerialBuffer));
     	if(strcmp(SerialBuffer, "0") == 0){
     		goto Exit1;
@@ -278,22 +243,19 @@ int main(void) {
     	else if(strcmp(SerialBuffer, "1") == 0){
     		serial_write(hComm, SerialBuffer);
     		serial_read(hComm, 1, SerialBuffer);
-    		//printf("'%s'\n", SerialBuffer);
 		}
 		else if(strcmp(SerialBuffer, "2") == 0){
     		serial_write(hComm, SerialBuffer);
     		serial_read(hComm, 1, SerialBuffer);
-    		//printf("'%s'\n", SerialBuffer);
 		}
 		else if(strcmp(SerialBuffer, "3") == 0){
     		serial_write(hComm, SerialBuffer);
     		serial_read(hComm, 1, SerialBuffer);
-    		//printf("'%s'\n", SerialBuffer);
 		}
 		else if(strcmp(SerialBuffer, "4") == 0){
     		printf("Enter the number you want to get square: ");
     		scanf("%s", temp);
-    		SerialBuffer[0] = '4';	//key of square function on arduino
+    		SerialBuffer[0] = '4';	// key of square function on arduino
     		strncat(SerialBuffer, temp, sizeof(temp));
     		
     		serial_write(hComm, SerialBuffer);
@@ -301,7 +263,7 @@ int main(void) {
     		printf("Result = %s\n", SerialBuffer);
 		}
 		else if(strcmp(SerialBuffer, "5") == 0){
-			printf("# PRESS 0 TO RETURN MENU #\n");
+			printf("#PRESS 0 TO RETURN MENU#\n");
 			serial_write(hComm, SerialBuffer);
 			char ch;
 			counter = 0;
@@ -349,8 +311,8 @@ int main(void) {
 			}
 		}
 		else if(strcmp(SerialBuffer, "7") == 0){
-			printf("# PRESS 0 TO RETURN MENU #\n");
-			serial_write(hComm, "5");  // command 5 because joystick and counter feature working on same time on arduino
+			printf("#PRESS 0 TO RETURN MENU#\n");
+			serial_write(hComm, "5");  // command 5 activates joystick in arduino
 			char ch;
 			int is_painting = 0;
 			cursor = '-';
@@ -385,13 +347,13 @@ int main(void) {
 					}
 					move_cursor(joystick_str, cursor, old_index, x, y, is_painting, '*');
 					old_index = joystick_index(x, y);
-					cPrint(joystick_str, 11);
+					colorprint(joystick_str, 11);
 				}
 			}
 		}
 		else if(strcmp(SerialBuffer, "8") == 0){
 			printf("# PRESS 0 TO RETURN MENU #\n");
-			serial_write(hComm, "5");  // command 5 because joystick and counter feature working on same time on arduino
+			serial_write(hComm, "5");  // command 5 activates joystick in arduino
 			char ch;
 			cursor = '*';
 			while(1){
@@ -421,8 +383,7 @@ int main(void) {
 					}
 					move_cursor(joystick_str, cursor, old_index, x, y, 0, ' ');
 					old_index = joystick_index(x, y);
-					cPrint(joystick_str, 13);
-					//printf("\n");
+					colorprint(joystick_str, 13);
 				}
 			}
 		}
@@ -455,28 +416,17 @@ int main(void) {
 			printf("\n");
 		}
 		else if(strcmp(SerialBuffer, "10") == 0){
-			char color[6];
-			printf("Enter the HEX Color value: #");
-			scanf("%s", color);
-			int rgb = hex2rgbCommand(color);	// in arduino side, negative commands controls the rgb
-			itoa(rgb, SerialBuffer, 10);
-			printf("value: '%s'\n",SerialBuffer);
-			serial_write(hComm, SerialBuffer);
-			serial_read(hComm, 1, SerialBuffer);
-			printf("value: '%s'\n",SerialBuffer);
-		}
-		else if(strcmp(SerialBuffer, "11") == 0){
 			printf("# PRESS 0 TO RETURN MENU #\n\n");
 			serial_write(hComm, "8");	// 7 starts rgb in arduino
 			char ch;
 			counter = 0;
 			
-			cPrint("  o       ", 12); //
-			cPrint("o                     ",14);    // 80 mm
-			cPrint("o                 ", 10);   //320mm
-			cPrint("o              ", 11);   //650mm
-			cPrint("o                    ", 9);    //
-			cPrint("o                    \n", 13);   //
+			colorprint("  o       ", 12);                
+			colorprint("o                     ",14);     
+			colorprint("o                 ", 10);        
+			colorprint("o              ", 11);           
+			colorprint("o                    ", 9);      
+			colorprint("o                    \n", 13);   
 			
 			while(1){
 				if(kbhit()){
@@ -503,13 +453,13 @@ int main(void) {
 			
 		}
 		else{
-			printf("Invalid value: '%s'\n",SerialBuffer);
+			printf("Invalid command: '%s'\n",SerialBuffer);
 		}
 	}
     
     
 Exit1:
-    CloseHandle(hComm);//Closing the Serial Port
+    CloseHandle(hComm); //Closing the Serial Port
 Exit2:
     print_outro();
     getch();
