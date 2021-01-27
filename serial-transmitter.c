@@ -22,7 +22,7 @@ void serial_write(HANDLE hComm, char *SerialBuffer){
 	    CloseHandle(hComm);//Closing the Serial Port
 	}
     //print numbers of byte written to the serial port
-    printf_s("\nNumber of bytes written to the serial port = %d\n\n", BytesWritten);
+    //printf_s("\nNumber of bytes written to the serial port = %d\n\n", BytesWritten);
 }
 
 
@@ -35,6 +35,7 @@ void serial_read(HANDLE hComm){
     BOOL Status;
 	
     //Read data and store in a buffer
+read:    
     do
     {
         Status = ReadFile(hComm, &ReadData, sizeof(ReadData), &NoBytesRead, NULL);
@@ -43,15 +44,20 @@ void serial_read(HANDLE hComm){
     } while (NoBytesRead > 0);
     --loop; //Get Actual length of received data
     if(loop > 0){
-    	//printf_s("\nNumber of bytes received = %d\n\n", loop);
-	    //print receive data on console
-	    //printf_s("\n\n");
+    	/*printf_s("\nNumber of bytes received = %d\n\n", loop);
+	    print receive data on console
+	    printf_s("\n\n");
+	    printf("data: '");
 	    int index = 0;
 	    for (index = 0; index < loop; ++index)
 	    {
-	        printf_s("%c", buffer[index]);
+			printf_s("%c", buffer[index]);
 	    }
-	    printf_s("\n\n");
+	    printf("'\n");*/
+	    printf("data: '%s' \n\n", buffer);
+	}else{
+		//printf("Buffer is empty.\n");
+		goto read;
 	}
 }
 
@@ -102,17 +108,16 @@ int main(void) {
         goto Exit1;
     }
     //Setting Timeouts
-    timeouts.ReadIntervalTimeout = 50;
-    timeouts.ReadTotalTimeoutConstant = 50;
-    timeouts.ReadTotalTimeoutMultiplier = 10;
-    timeouts.WriteTotalTimeoutConstant = 50;
-    timeouts.WriteTotalTimeoutMultiplier = 10;
+    timeouts.ReadIntervalTimeout = 3;
+    timeouts.ReadTotalTimeoutConstant = 3;
+    timeouts.ReadTotalTimeoutMultiplier = 2;
+    timeouts.WriteTotalTimeoutConstant = 3;
+    timeouts.WriteTotalTimeoutMultiplier = 2;
     if (SetCommTimeouts(hComm, &timeouts) == FALSE)
     {
         printf_s("\nError to Setting Time outs");
         goto Exit1;
     }
-    
     
     //Setting Receive Mask
     Status = SetCommMask(hComm, EV_RXCHAR);
@@ -129,45 +134,18 @@ int main(void) {
         CloseHandle(hComm);
     }
     
-    
+    serial_read(hComm);
     while(1){
     	printf_s("\n\nEnter your message: ");
     	scanf_s("%s", SerialBuffer, (unsigned)_countof(SerialBuffer));
+    	if(strcmp(SerialBuffer, "q") == 0){
+    		goto Exit1;
+		}
     	serial_write(hComm, SerialBuffer);
+    	
     	serial_read(hComm);
 	}
     
-    /*//Setting Receive Mask
-    Status = SetCommMask(hComm, EV_RXCHAR);
-    if (Status == FALSE)
-    {
-        printf_s("\nError to in Setting CommMask\n\n");
-        goto Exit1;
-    }
-    //Setting WaitComm() Event
-    Status = WaitCommEvent(hComm, &dwEventMask, NULL); //Wait for the character to be received
-    if (Status == FALSE)
-    {
-        printf_s("\nError! in Setting WaitCommEvent()\n\n");
-        goto Exit1;
-    }
-    //Read data and store in a buffer
-    do
-    {
-        Status = ReadFile(hComm, &ReadData, sizeof(ReadData), &NoBytesRead, NULL);
-        SerialBuffer[loop] = ReadData;
-        ++loop;
-    } while (NoBytesRead > 0);
-    --loop; //Get Actual length of received data
-    printf_s("\nNumber of bytes received = %d\n\n", loop);
-    //print receive data on console
-    printf_s("\n\n");
-    int index = 0;
-    for (index = 0; index < loop; ++index)
-    {
-        printf_s("%c", SerialBuffer[index]);
-    }
-    printf_s("\n\n");*/
     
 Exit1:
     CloseHandle(hComm);//Closing the Serial Port
