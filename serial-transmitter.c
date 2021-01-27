@@ -1,6 +1,6 @@
-// Version 7.0 
-// All ter1minal is light green
-// Joystick and Counter on same feature
+// Version 8.0 
+// Terminal has various color
+// Joystick feature copied to 7 and removed from 5
 
 
 #include <Windows.h>
@@ -10,6 +10,14 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <conio.h> 
+
+cPrint(char msg[], int k){
+	HANDLE  hConsole;
+	hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, k);
+    printf("%s", msg);
+    SetConsoleTextAttribute(hConsole, 15);	//return to default: 15
+}
 
 void progressIndicator(char msg[]){
 	printf("%s", msg);
@@ -23,31 +31,32 @@ void progressIndicator(char msg[]){
 }
 
 void print_intro(){
-	system("color 0A");
+	//system("color 0A");
 	
-	printf("    __  __                         ___             __      _                ____       _                \n");
-	printf("   / / / /_  ______  ___  _____   /   |  _________/ /_  __(_)___  ____     / __ \\_____(_)   _____  _____\n");
-	printf("  / /_/ / / / / __ \\/ _ \\/ ___/  / /| | / ___/ __  / / / / / __ \\/ __ \\   / / / / ___/ / | / / _ \\/ ___/\n");
-	printf(" / __  / /_/ / /_/ /  __/ /     / ___ |/ /  / /_/ / /_/ / / / / / /_/ /  / /_/ / /  / /| |/ /  __/ /    \n");
-	printf("/_/ /_/\\__, / .___/\\___/_/     /_/  |_/_/   \\__,_/\\__,_/_/_/ /_/\\____/  /_____/_/  /_/ |___/\\___/_/     \n");
-	printf("      /____/_/                                                                                          \n");
-	printf("                                                                                        Author: hybrayhem\n\n\n");
+	cPrint("    __  __                         ___             __      _                ____       _                \n", 10);
+	cPrint("   / / / /_  ______  ___  _____   /   |  _________/ /_  __(_)___  ____     / __ \\_____(_)   _____  _____\n", 10);
+	cPrint("  / /_/ / / / / __ \\/ _ \\/ ___/  / /| | / ___/ __  / / / / / __ \\/ __ \\   / / / / ___/ / | / / _ \\/ ___/\n", 10);
+	cPrint(" / __  / /_/ / /_/ /  __/ /     / ___ |/ /  / /_/ / /_/ / / / / / /_/ /  / /_/ / /  / /| |/ /  __/ /    \n", 10);
+	cPrint("/_/ /_/\\__, / .___/\\___/_/     /_/  |_/_/   \\__,_/\\__,_/_/_/ /_/\\____/  /_____/_/  /_/ |___/\\___/_/     \n", 10);
+	cPrint("      /____/_/                                                                                          \n", 10);
+	cPrint("                                                                                        Author: hybrayhem\n\n\n\n", 10);
 
-	printf("Please select from the following Menu:\n\n");
-	printf("(1) Turn on Led on The Arduino\n");
-	printf("(2) Turn off Led on The Arduino\n");
-	printf("(3) Flash Arduino Led 3 times\n");
-	printf("(4) Send a number to Arduino for compute square in it\n");
-	printf("(5) Button press counter with The Ultimate Joystick Visualizer\n");
-	printf("(6) LED Blink Counting game\n");
-	printf("(0) Exit\n");
+	cPrint("Please select from the following Menu:\n\n", 14);
+	cPrint("(1) ", 14);	cPrint("Turn ON Led on The Arduino\n", 11);
+	cPrint("(2) ", 14); cPrint("Turn OFF Led on The Arduino\n", 11);
+	cPrint("(3) ", 14); cPrint("Flash Arduino Led 3 times\n", 11);
+	cPrint("(4) ", 14); cPrint("Send a number to Arduino for compute square in it\n", 11);
+	cPrint("(5) ", 14); cPrint("Button Press Counter\n", 11);
+	cPrint("(6) ", 14); cPrint("LED Blink Counting game\n", 11);
+	cPrint("(7) ", 14); cPrint("The Ultimate Joystick Visualizer\n", 13);
+	cPrint("(0) ", 12); cPrint("Exit\n", 12);
 	
 	printf("\nConnecting to Arduino...");
 }
 
 void print_outro(){
 	printf("\n\n");
-	printf("Game over. \n");
+	cPrint("Game over. \n", 12);
 }
 
 
@@ -196,9 +205,11 @@ int main(void) {
     
     
     serial_read(hComm, 1, SerialBuffer);	//Reading ready message from arduino
+    
     printf(" %s\n", SerialBuffer);
     while(1){
-    	printf_s("\nEnter the selection: ");
+    	//printf_s("\nEnter the selection: ");
+    	cPrint("\nEnter the selection: ", 7);
     	scanf_s("%s", SerialBuffer, (unsigned)_countof(SerialBuffer));
     	if(strcmp(SerialBuffer, "0") == 0){
     		goto Exit1;
@@ -226,11 +237,58 @@ int main(void) {
     		
     		serial_write(hComm, SerialBuffer);
     		serial_read(hComm, 1, SerialBuffer);
-    		printf("Result = '%s'\n", SerialBuffer);
+    		printf("Result = %s\n", SerialBuffer);
 		}
 		else if(strcmp(SerialBuffer, "5") == 0){
 			printf("# PRESS 0 TO RETURN MENU #\n");
 			serial_write(hComm, SerialBuffer);
+			char ch;
+			counter = 0;
+			while(1){
+				if(kbhit()){
+					// Stores the pressed key in ch 
+		            ch = getch(); 
+		            // Terminates the loop when escape is pressed 
+		            if (ch == '0'){
+		            	serial_write(hComm, "9");
+		            	serial_read(hComm, 1, SerialBuffer); //for waiting end message from joystick data stream of arduino
+					    break;
+					}	    
+				}
+				serial_read(hComm, 0, SerialBuffer);
+				if(SerialBuffer[0] != '\0'){
+					if(SerialBuffer[0] == '+'){
+						counter++;
+					}
+					printf("\rYou have pressed button %d times.", counter);
+				}
+			}
+			printf("\n");
+		}
+		else if(strcmp(SerialBuffer, "6") == 0){
+			printf("Welcome to the LED Blink Counting game :)\n");
+			
+    		srand(time(NULL));
+			int x = rand() % 9 + 1;
+			itoa(x, temp, 10);
+			SerialBuffer[0] = '6';	//key of blink function on arduino
+			strncat(SerialBuffer, temp, sizeof(temp));
+			
+    		progressIndicator("A random blink is coming");
+			serial_write(hComm, SerialBuffer);
+			serial_read(hComm, 1, SerialBuffer);
+			printf("Enter the number of blinks: ");
+			scanf("%d", &number);
+			printf("\n");
+			if(number == x){
+				printf("Correct!\n");
+			}else{
+				printf("Wrong! The answer was %d.\n", x);
+			}
+		}
+		else if(strcmp(SerialBuffer, "7") == 0){
+			printf("# PRESS 0 TO RETURN MENU #\n");
+			serial_write(hComm, "5");  // command 5 because joystick and counter feature working on same time on arduino
 			char ch;
 			counter = 0;
 			while(1){
@@ -261,34 +319,13 @@ int main(void) {
 					}
 					move_cursor(joystick_str, cursor, old_index, x, y);
 					old_index = joystick_index(x, y);
-					printf("%s", joystick_str);
+					cPrint(joystick_str, 13);
 					
 					printf("\nYou have pressed button %d times.\n\n", counter);
 				}
 			}
 		}
-		else if(strcmp(SerialBuffer, "6") == 0){
-			printf("Welcome to the LED Blink Counting game :)\n");
-			
-    		srand(time(NULL));
-			int x = rand() % 9 + 1;
-			itoa(x, temp, 10);
-			SerialBuffer[0] = '6';	//key of blink function on arduino
-			strncat(SerialBuffer, temp, sizeof(temp));
-			
-    		progressIndicator("A random blink is coming");
-			serial_write(hComm, SerialBuffer);
-			serial_read(hComm, 1, SerialBuffer);
-			printf("Enter the number of blinks: ");
-			scanf("%d", &number);
-			printf("\n");
-			if(number == x){
-				printf("Correct!\n");
-			}else{
-				printf("Wrong! The answer was %d.\n", x);
-			}
-			
-		}else{
+		else{
 			printf("Invalid value: '%s'\n",SerialBuffer);
 		}
 	}
