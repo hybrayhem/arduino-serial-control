@@ -1,4 +1,4 @@
-# serial-control
+# arduino-serial-control
 
 C serial transmitter communication with Arduino receiver.
 
